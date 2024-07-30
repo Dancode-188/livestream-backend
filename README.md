@@ -6,7 +6,7 @@
 
 
 
-This is the backend server for a live streaming application built using NestJS and MongoDB. It provides robust APIs for user authentication, stream management, real-time chat, and various interactive features to enhance the live streaming experience.
+This is a robust backend server for a live streaming application built using NestJS and MongoDB. It provides comprehensive APIs for user authentication, stream management, real-time chat, and various interactive features to enhance the live streaming experience.
 
 
 
@@ -40,6 +40,8 @@ This is the backend server for a live streaming application built using NestJS a
 
 - Donation and subscription system
 
+- Logging and monitoring with Winston and Prometheus
+
 
 
 ## Prerequisites
@@ -48,7 +50,7 @@ This is the backend server for a live streaming application built using NestJS a
 
 - Node.js (v16 or later)
 
-- MongoDB
+- MongoDB (v4.4 or later)
 
 - Docker and Docker Compose (for containerized deployment)
 
@@ -160,9 +162,19 @@ npm run start:prod
 
 
 
-- POST `/auth/register`: Register a new user
+- POST `/auth/register`
 
-- POST `/auth/login`: Login and receive JWT token
+- Request body: `{ "username": string, "password": string }`
+
+- Response: User object
+
+
+
+- POST `/auth/login`
+
+- Request body: `{ "username": string, "password": string }`
+
+- Response: `{ "access_token": string }`
 
 
 
@@ -170,27 +182,49 @@ npm run start:prod
 
 
 
-- GET `/streams`: Get all live streams
+- GET `/streams`
 
-- POST `/streams`: Create a new stream
-
-- GET `/streams/:id`: Get stream details
-
-- PATCH `/streams/:id`: Update stream details
-
-- DELETE `/streams/:id`: Delete a stream
-
-- POST `/streams/:id/start`: Start a stream
-
-- POST `/streams/:id/end`: End a stream
+- Response: Array of stream objects
 
 
 
-### Chat
+- POST `/streams`
+
+- Request body: `{ "title": string, "description": string }`
+
+- Response: Created stream object
 
 
 
-- WebSocket connection for real-time chat: `ws://localhost:3000/chat`
+- GET `/streams/:id`
+
+- Response: Stream object
+
+
+
+- PATCH `/streams/:id`
+
+- Request body: `{ "title"?: string, "description"?: string }`
+
+- Response: Updated stream object
+
+
+
+- DELETE `/streams/:id`
+
+- Response: Deleted stream object
+
+
+
+- POST `/streams/:id/start`
+
+- Response: Started stream object
+
+
+
+- POST `/streams/:id/end`
+
+- Response: Ended stream object
 
 
 
@@ -198,9 +232,17 @@ npm run start:prod
 
 
 
-- GET `/users/:username`: Get user profile
+- GET `/users/:username`
 
-- PATCH `/users/:username`: Update user profile
+- Response: User object (excluding password)
+
+
+
+- PATCH `/users/:username`
+
+- Request body: `{ "email"?: string, "bio"?: string }`
+
+- Response: Updated user object
 
 
 
@@ -208,13 +250,51 @@ npm run start:prod
 
 
 
+Connect to WebSocket server at `ws://localhost:3000/chat`
+
+
+
+### Client to Server Events
+
+
+
 - `joinStream`: Join a stream's chat room
+
+- Payload: `{ streamId: string }`
+
+
 
 - `leaveStream`: Leave a stream's chat room
 
+- Payload: `{ streamId: string }`
+
+
+
 - `chatMessage`: Send a chat message
 
+- Payload: `{ streamId: string, content: string }`
+
+
+
+### Server to Client Events
+
+
+
 - `newMessage`: Receive a new chat message
+
+- Payload: `{ userId: string, username: string, content: string, timestamp: Date }`
+
+
+
+- `userJoined`: Notification when a user joins the chat
+
+- Payload: `{ username: string }`
+
+
+
+- `userLeft`: Notification when a user leaves the chat
+
+- Payload: `{ username: string }`
 
 
 
@@ -250,7 +330,7 @@ npm run test:e2e
 
 
 
-The application can be deployed to various cloud services. Here are general steps:
+### Standard Deployment
 
 
 
@@ -264,15 +344,124 @@ The application can be deployed to various cloud services. Here are general step
 
 
 
-For containerized deployment:
+### Containerized Deployment
 
 
 
-1. Build the Docker image
+1. Build the Docker image:
 
-2. Push the image to a container registry
+```
 
-3. Deploy using Kubernetes or your preferred orchestration tool
+  docker build -t livestream-backend .
+
+```
+
+
+
+2. Push the image to a container registry:
+
+```
+
+  docker push your-registry/livestream-backend:latest
+
+```
+
+
+
+3. Deploy using Kubernetes:
+
+  - Create a Kubernetes deployment YAML file
+
+  - Apply the deployment: `kubectl apply -f deployment.yaml`
+
+
+
+### Cloud Deployment (Example: Heroku)
+
+
+
+1. Install the Heroku CLI and log in:
+
+```
+
+heroku login
+
+```
+
+
+2. Create a new Heroku app:
+
+```
+
+heroku create your-app-name
+
+```
+
+
+3. Add the MongoDB add-on to your Heroku app:
+
+```
+
+heroku addons:create mongodbatlas:sandbox
+
+```
+
+
+4. Set up environment variables on Heroku:
+
+```
+
+heroku config:set JWT_SECRET=your_jwt_secret_here
+heroku config:set JWT_EXPIRES_IN=1d
+
+```
+
+
+5. Add a Procfile to your project root:
+
+```
+
+web: npm run start:prod
+
+```
+
+
+6. Deploy your application on Heroku:
+
+```
+
+git push heroku main
+
+```
+
+7. Ensure at least one instance of the app is running:
+
+```
+
+heroku ps:scale web=1
+
+```
+
+
+8. Open the deployed application:
+
+```
+
+heroku open
+
+```
+
+
+
+## Monitoring and Logging
+
+
+
+- Prometheus metrics available at: `http://localhost:3000/metrics`
+
+- Grafana dashboard for visualizing metrics (set up separately)
+
+- Logs are written to `combined.log` and `error.log` files
 
 
 
