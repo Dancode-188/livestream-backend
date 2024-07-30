@@ -60,23 +60,23 @@ This is the backend server for a live streaming application built using NestJS a
 
 1. Clone the repository:
 
-  ```
+```
 
   git clone https://github.com/Dancode-188/livestream-backend.git
 
   cd livestream-backend
 
-  ```
+```
 
 
 
 2. Install dependencies:
 
-  ```
+```
 
   npm install
 
-  ```
+```
 
 
 
@@ -84,7 +84,7 @@ This is the backend server for a live streaming application built using NestJS a
 
   Create a `.env` file in the root directory and add the following variables:
 
-  ```
+```
 
   PORT=3000
 
@@ -94,7 +94,7 @@ This is the backend server for a live streaming application built using NestJS a
 
   JWT_EXPIRES_IN=1d
 
-  ```
+```
 
 
 
@@ -134,21 +134,21 @@ npm run start:prod
 
 1. Build the Docker image:
 
-  ```
+```
 
   docker-compose build
 
-  ```
+```
 
 
 
 2. Run the containers:
 
-  ```
+```
 
   docker-compose up
 
-  ```
+```
 
 
 
